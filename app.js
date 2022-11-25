@@ -1,10 +1,11 @@
+//jshint esversion:6
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 
-const homeStartingContent =
-  "Hi there! Here you can write your daily blogs.";
+const homeStartingContent = "Write your blogs here.";
 const aboutContent =
   "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
 const contactContent =
@@ -20,7 +21,10 @@ app.use(express.static("public"));
 let posts = [];
 
 app.get("/", function (req, res) {
-  res.render("home", { startingContent: homeStartingContent, posts: posts });
+  res.render("home", {
+    startingContent: homeStartingContent,
+    posts: posts,
+  });
 });
 
 app.get("/about", function (req, res) {
@@ -35,23 +39,30 @@ app.get("/compose", function (req, res) {
   res.render("compose");
 });
 
-app.get("/posts/:postName", function(req, res){
-  var requestedTitle = _.lowerCase(req.params.postName);
-  console.log(req.params.postName);
-  posts.forEach(function(post){
-    if(_.lowerCase(post.title)===requestedTitle){
-      res.render("post",{postTitle: post.title, postContent: post.content})
-    }
-  })
-})
-
 app.post("/compose", function (req, res) {
   const post = {
-    title: req.body.postTitle, 
-    content: req.body.postBody
+    title: req.body.postTitle,
+    content: req.body.postBody,
   };
+
   posts.push(post);
+
   res.redirect("/");
+});
+
+app.get("/posts/:postName", function (req, res) {
+  const requestedTitle = _.lowerCase(req.params.postName);
+
+  posts.forEach(function (post) {
+    const storedTitle = _.lowerCase(post.title);
+
+    if (storedTitle === requestedTitle) {
+      res.render("post", {
+        title: post.title,
+        content: post.content,
+      });
+    }
+  });
 });
 
 app.listen(3000, function () {
